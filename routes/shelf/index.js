@@ -1,4 +1,45 @@
 const shelfTable = require("./table");
+const transferTable = require("../transfer/table");
+
+const purchase = async ({ endpoint, method, body, params, query }) => {
+	let package = await stockTable.find(body.id);
+	const delta = package.amount - body.amount;
+	if (delta < 0) {
+		return new Error();
+	}
+	package = {
+		...package,
+		amount: delta,
+	};
+	let shelfProduct = await shelfTable.find(body.id);
+	if (!!shelfProduct) {
+		shelfProduct = {
+			...shelfProduct,
+			amount: shelfProduct.amount + body.amount,
+		};
+		await shelfTable.update(body.id, shelfProduct);
+	} else {
+		await shelfTable.create({
+			...package,
+			amount: body.amount,
+		});
+	}
+
+	const updatedPackage = await stockTable.update(id, package);
+	if (!updatedPackage === 0) {
+		return new Error();
+	}
+
+	delete package.id;
+	return transferTable.create({
+		...package,
+		code: id,
+		amount: body.amount,
+		type: 1,
+		interactionDate: new Date().toISOString(),
+		interactionMillis: new Date().getTime(),
+	});
+};
 
 const treatRoute = async ({ endpoint, method, body, params, query }) => {
 	switch (method) {
@@ -8,14 +49,8 @@ const treatRoute = async ({ endpoint, method, body, params, query }) => {
 			}
 			return shelfTable.list({ raw: true });
 		case "PUT":
-			// const package = await shelfTable.find(params.id);
-			// if (!package) {
-			// 	return new Error();
-			// }
 			if (endpoint.includes("/purchase")) {
-				return {
-					FOI: "Compra",
-				};
+				return purchase();
 			}
 			return {
 				FOI: "Retirada",
