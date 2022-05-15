@@ -9,6 +9,8 @@ const instance = mongoose.model("transfers", {
 	expiringDate: String,
 	origin: String,
 	amount: Number,
+	newStockAmount: Number,
+	newShelfAmount: Number,
 	interactionDate: String,
 	interactionMillis: Number,
 });

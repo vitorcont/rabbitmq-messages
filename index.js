@@ -45,7 +45,7 @@ amqp.connect("amqp://localhost", function (error0, connection) {
 				};
 				try {
 					const res = await router(message);
-					console.log("--- RES", res);
+					// console.log("--- RES", res);
 					if (message.method === "GET") {
 						responseMessage = {
 							...responseMessage,
@@ -56,10 +56,10 @@ amqp.connect("amqp://localhost", function (error0, connection) {
 						throw new Error(res);
 					}
 				} catch (err) {
-					console.log("TRYERRO", err);
+					// console.log("TRYERRO", err);
 					responseMessage = {
 						code: 400,
-						body: err,
+						body: {message: err},
 					};
 				}
 				channel.sendToQueue(
