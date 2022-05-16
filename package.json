@@ -16,6 +16,7 @@
 		"mongoose": "^6.3.1",
 		"mysql2": "^2.3.3",
 		"nodemon": "^2.0.15",
+		"rabbitmq-delete-message": "^1.0.0",
 		"sequelize": "^6.19.0"
 	}
 }

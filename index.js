@@ -1,6 +1,8 @@
 var amqp = require("amqplib/callback_api");
 const router = require("./routes");
 const mongoose = require("mongoose");
+const serverURL = "amqp://localhost";
+
 
 const credentials = {
 	user: "root",
@@ -31,7 +33,7 @@ amqp.connect("amqp://localhost", function (error0, connection) {
 		channel.assertQueue(queue, {
 			durable: false,
 		});
-
+		
 		console.log(" [*] Waiting for messages in %s. To exit press CTRL+C", queue);
 
 		channel.consume(
@@ -63,16 +65,19 @@ amqp.connect("amqp://localhost", function (error0, connection) {
 					};
 				}
 				channel.sendToQueue(
-					queue,
+					"reply_api",
 					Buffer.from(JSON.stringify(responseMessage)),
 					{
+						persistent: false,
 						correlationId: msg.properties.correlationId,
+						messageId: msg.properties.correlationId
 					},
 				);
 				channel.ack({
 					...msg,
 					content: Buffer.from(JSON.stringify(responseMessage)),
 				});
+				// channel.release();
 			},
 			{ noAck: false },
 			(err) => {
