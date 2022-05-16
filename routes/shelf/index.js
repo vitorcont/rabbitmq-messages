@@ -2,17 +2,7 @@ const shelfTable = require("./table");
 const transferTable = require("../transfer/table");
 const stockTable = require("../stock/table");
 
-let id = "";
-let newStockAmount = -1;
-let newShelfAmount = -1;
-
-
 const purchase = async ({ endpoint, method, body, params, query }) => {
-	if (body.id === id && newShelfAmount === body.newShelfAmount) {
-		return new Error("500");
-	}
-	id = body.id;
-	newShelfAmount = body.newShelfAmount;
 	let package = await shelfTable.find(body.id);
 	if (!package) {
 		return new Error("Não foi possível encontrar esse produto");
@@ -31,6 +21,8 @@ const purchase = async ({ endpoint, method, body, params, query }) => {
 		amount: body.newShelfAmount,
 	};
 
+	const stock = await stockTable.find(body.id);
+
 	delete package.id;
 	return transferTable.create({
 		...package,
@@ -38,19 +30,13 @@ const purchase = async ({ endpoint, method, body, params, query }) => {
 		amount: body.amount,
 		type: 2,
 		newShelfAmount: body.newShelfAmount,
-		newStockAmount: 0,
+		newStockAmount: stock.amount,
 		interactionDate: new Date().toISOString(),
 		interactionMillis: new Date().getTime(),
 	});
 };
 
 const withdrawal = async ({ endpoint, method, body, params, query }) => {
-	if (body.id === id && newStockAmount === body.newStockAmount) {
-		return new Error();
-	}
-	id = body.id;
-	newStockAmount = body.newStockAmount;
-	
 	let package = await stockTable.find(body.id);
 	if (!package) {
 		return new Error();

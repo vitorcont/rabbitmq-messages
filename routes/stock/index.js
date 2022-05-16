@@ -1,6 +1,4 @@
 const stockTable = require("./table");
-let id = "";
-let amount = -1;
 
 const treatRoute = async ({ endpoint, method, body, params, query }) => {
 	switch (method) {
@@ -12,12 +10,6 @@ const treatRoute = async ({ endpoint, method, body, params, query }) => {
 		case "POST":
 			return stockTable.create(body);
 		case "PUT":
-			if (id === body.id && amount === body.amount) {
-				return new Error();
-			}
-			id = body.id;
-			amount = body.amount;
-			
 			let package;
 			package = await stockTable.find(params.id);
 			if (!package) {
